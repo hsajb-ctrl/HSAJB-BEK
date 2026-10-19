@@ -301,26 +301,7 @@
         document.getElementById('statusMsg').innerText =
             '❌ ' + err.message;
     });
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'found') {
-                currentData = data;
-                document.getElementById('resNama').innerText = data.nama;
-                document.getElementById('resJumlah').innerText = data.jumlah;
-                document.getElementById('resPasang').innerText = data.pasang;
-                hasilBox.style.display = 'block';
-                statusMsg.innerText = '';
-            } else {
-                statusMsg.style.color = '#dc2626';
-                statusMsg.innerText = '❌ Maaf, No. KP tidak dijumpai.';
-            }
-        })
-        .catch(err => {
-            statusMsg.style.color = '#dc2626';
-            statusMsg.innerText = '❌ Ralat sambungan ke pelayan.';
-            console.error("Ralat carian:", err);
-        });
-    }
+        
 
     function simpanData() {
         let jw = document.getElementById('selectJawatan').value;
