@@ -181,26 +181,23 @@
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwgpvMSliyiLXWS3WP17ZDbG-8kUzpHZ7eXT9WPBTEe4XYe9dq_2kGQZe7Gq-oGUD_f/exec';
     let currentData = {};
     let globalDropdownData = [];
-
     
     function bukaPermohonan() {
-        console.log("Butang PERMOHONAN diklik");
-    
         document.getElementById('landingPage').style.display = 'none';
         document.getElementById('formPage').style.display = 'block';
     
         muatDataDropdown();
     }
-
+    
     function bukaAdmin() {
-        // Arahkan terus ke fail PHP admin bro (contoh: admin.php)
         window.location.href = 'admin.php';
     }
-
+    
     function kembaliKeMukaDepan() {
         document.getElementById('formPage').style.display = 'none';
         document.getElementById('landingPage').style.display = 'flex';
     }
+
 
     function muatDataDropdown() {
         fetch(scriptURL + '?action=getDropdowns', {
