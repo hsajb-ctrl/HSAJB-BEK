@@ -295,13 +295,14 @@
             throw new Error(data.message || data.status || 'Ralat pelayan');
         }
     })
-    .catch(err => {
+     .catch(err => {
         console.error("Ralat carian:", err);
 
         document.getElementById('statusMsg').style.color = '#dc2626';
         document.getElementById('statusMsg').innerText =
             '❌ ' + err.message;
     });
+    } // PENUTUP FUNGSI semakKP()
         
 
     function simpanData() {
