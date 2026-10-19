@@ -262,13 +262,45 @@
         hasilBox.style.display = 'none';
 
         // Tukar kepada kaedah POST atau pastikan GET menyertakan header yang bersih
-        fetch(scriptURL + '?nokp=' + encodeURIComponent(kp), {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
+        fetch(scriptURL + '?nokp=' + encodeURIComponent(kp))
+    .then(async res => {
+        const text = await res.text();
+
+        console.log("HTTP Status:", res.status);
+        console.log("Respons Server:", text);
+
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+
+        return JSON.parse(text);
+    })
+    .then(data => {
+        console.log("Data diterima:", data);
+
+        if (data.status === 'found') {
+            currentData = data;
+
+            document.getElementById('resNama').innerText = data.nama;
+            document.getElementById('resJumlah').innerText = data.jumlah;
+            document.getElementById('resPasang').innerText = data.pasang;
+
+            document.getElementById('hasilBox').style.display = 'block';
+            document.getElementById('statusMsg').innerText = '';
+        } else if (data.status === 'not_found') {
+            document.getElementById('statusMsg').innerText =
+                '❌ No. KP tidak dijumpai.';
+        } else {
+            throw new Error(data.message || data.status || 'Ralat pelayan');
+        }
+    })
+    .catch(err => {
+        console.error("Ralat carian:", err);
+
+        document.getElementById('statusMsg').style.color = '#dc2626';
+        document.getElementById('statusMsg').innerText =
+            '❌ ' + err.message;
+    });
         .then(res => res.json())
         .then(data => {
             if (data.status === 'found') {
