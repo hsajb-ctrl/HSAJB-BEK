@@ -199,69 +199,44 @@
     }
 
     function muatDataDropdown() {
-        fetch(scriptURL + '?action=getDropdowns')
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === 'dropdowns') {
-                    globalDropdownData = res.data;
-                    let jawatanSet = new Set();
-                    let jabatanSet = new Set();
+        fetch(scriptURL + '?action=getDropdowns', {
+            method: 'GET',
+            mode: 'cors', // Pastikan tetapan mod eksplisit
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'dropdowns') {
+                globalDropdownData = res.data;
+                let jawatanSet = new Set();
+                let jabatanSet = new Set();
 
-                    globalDropdownData.forEach(item => {
-                        if (item.jawatan) jawatanSet.add(item.jawatan);
-                        if (item.jabatan) jabatanSet.add(item.jabatan);
-                    });
+                globalDropdownData.forEach(item => {
+                    if (item.jawatan) jawatanSet.add(item.jawatan);
+                    if (item.jabatan) jabatanSet.add(item.jabatan);
+                });
 
-                    let selJawatan = document.getElementById('selectJawatan');
-                    selJawatan.innerHTML = '<option value="">-- Pilih Jawatan --</option>';
-                    jawatanSet.forEach(jw => {
-                        let opt = document.createElement('option');
-                        opt.value = jw; opt.textContent = jw;
-                        selJawatan.appendChild(opt);
-                    });
+                let selJawatan = document.getElementById('selectJawatan');
+                selJawatan.innerHTML = '<option value="">-- Pilih Jawatan --</option>';
+                jawatanSet.forEach(jw => {
+                    let opt = document.createElement('option');
+                    opt.value = jw; opt.textContent = jw;
+                    selJawatan.appendChild(opt);
+                });
 
-                    let selJabatan = document.getElementById('selectJabatan');
-                    selJabatan.innerHTML = '<option value="">-- Pilih Jabatan --</option>';
-                    jabatanSet.forEach(jb => {
-                        let opt = document.createElement('option');
-                        opt.value = jb; opt.textContent = jb;
-                        selJabatan.appendChild(opt);
-                    });
-                }
-            });
-    }
-
-    function tapisGred() {
-        let selectedJawatan = document.getElementById('selectJawatan').value;
-        let selGred = document.getElementById('selectGred');
-        selGred.innerHTML = '<option value="">-- Pilih Gred --</option>';
-        if (!selectedJawatan) return;
-
-        let gredSet = new Set();
-        globalDropdownData.forEach(item => {
-            if (item.jawatan === selectedJawatan && item.gred) gredSet.add(item.gred);
-        });
-        gredSet.forEach(gd => {
-            let opt = document.createElement('option');
-            opt.value = gd; opt.textContent = gd;
-            selGred.appendChild(opt);
-        });
-    }
-
-    function tapisUnit() {
-        let selectedJabatan = document.getElementById('selectJabatan').value;
-        let selUnit = document.getElementById('selectUnit');
-        selUnit.innerHTML = '<option value="">-- Pilih Unit --</option>';
-        if (!selectedJabatan) return;
-
-        let unitSet = new Set();
-        globalDropdownData.forEach(item => {
-            if (item.jabatan === selectedJabatan && item.unit) unitSet.add(item.unit);
-        });
-        unitSet.forEach(un => {
-            let opt = document.createElement('option');
-            opt.value = un; opt.textContent = un;
-            selUnit.appendChild(opt);
+                let selJabatan = document.getElementById('selectJabatan');
+                selJabatan.innerHTML = '<option value="">-- Pilih Jabatan --</option>';
+                jabatanSet.forEach(jb => {
+                    let opt = document.createElement('option');
+                    opt.value = jb; opt.textContent = jb;
+                    selJabatan.appendChild(opt);
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Ralat dropdown:", err);
         });
     }
 
@@ -286,21 +261,33 @@
         statusMsg.innerText = '🔍 Mencari rekod...';
         hasilBox.style.display = 'none';
 
-        fetch(scriptURL + '?nokp=' + encodeURIComponent(kp))
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'found') {
-                    currentData = data;
-                    document.getElementById('resNama').innerText = data.nama;
-                    document.getElementById('resJumlah').innerText = data.jumlah;
-                    document.getElementById('resPasang').innerText = data.pasang;
-                    hasilBox.style.display = 'block';
-                    statusMsg.innerText = '';
-                } else {
-                    statusMsg.style.color = '#dc2626';
-                    statusMsg.innerText = '❌ Maaf, No. KP tidak dijumpai.';
-                }
-            });
+        // Tukar kepada kaedah POST atau pastikan GET menyertakan header yang bersih
+        fetch(scriptURL + '?nokp=' + encodeURIComponent(kp), {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'found') {
+                currentData = data;
+                document.getElementById('resNama').innerText = data.nama;
+                document.getElementById('resJumlah').innerText = data.jumlah;
+                document.getElementById('resPasang').innerText = data.pasang;
+                hasilBox.style.display = 'block';
+                statusMsg.innerText = '';
+            } else {
+                statusMsg.style.color = '#dc2626';
+                statusMsg.innerText = '❌ Maaf, No. KP tidak dijumpai.';
+            }
+        })
+        .catch(err => {
+            statusMsg.style.color = '#dc2626';
+            statusMsg.innerText = '❌ Ralat sambungan ke pelayan.';
+            console.error("Ralat carian:", err);
+        });
     }
 
     function simpanData() {
