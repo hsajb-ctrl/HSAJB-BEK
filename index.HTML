@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Semakan & Portal Admin</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        
+        /* Gambar Background Laman Utama */
+        body { 
+            background: url('h6.jpgJ') no-repeat center center fixed; 
+            background-size: cover;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay {
+            background: rgba(15, 23, 42, 0.75);
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Card Landing Page (2 Box) */
+        .landing-box {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px 20px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .option-card h3 { color: #1e293b; margin-bottom: 10px; }
+        .option-card p { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+
+        .btn-card {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            width: 100%;
+            cursor: pointer;
+        }
+        .btn-user { background: #2563eb; }
+        .btn-admin { background: #475569; }
+
+        /* Form Card */
+        .card {
+            background: white;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { font-weight: bold; font-size: 14px; color: #334155; display: block; margin-bottom: 5px; }
+        input[type="text"], select { width: 100%; padding: 12px; font-size: 16px; border: 1.5px solid #cbd5e0; border-radius: 8px; background: #fff; }
+        
+        .btn-semak { background: #2563eb; width: 100%; padding: 14px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .btn-simpan { background: #16a34a; width: 100%; padding: 14px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        
+        .result-box { margin-top: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: none; }
+        .data-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; }
+        #statusMsg { text-align: center; font-weight: bold; margin-top: 15px; font-size: 15px; }
+        .btn-back { background: none; border: none; color: #64748b; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<div class="container">
+    
+    <!-- 1. MUKA DEPAN: 2 BOX PILIHAN (PERMOHONAN VS ADMIN) -->
+    <div id="landingPage" class="landing-box">
+        <!-- Box Kiri: Permohonan -->
+        <div class="option-card" onclick="bukaPermohonan()">
+            <div style="font-size: 40px; margin-bottom: 10px;">📝</div>
+            <h3>PERMOHONAN</h3>
+            <p>Semakan No. KP & pendaftaran maklumat pegawai.</p>
+            <button class="btn-card btn-user">MASUK PERMOHONAN</button>
+        </div>
+
+        <!-- Box Kanan: Admin -->
+        <div class="option-card" onclick="bukaAdmin()">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔐</div>
+            <h3>ADMINISTRATOR</h3>
+            <p>Pengesahan permohonan & cetakan borang rasmi.</p>
+            <button class="btn-card btn-admin">LOG MASUK ADMIN</button>
+        </div>
+    </div>
+
+    <!-- 2. FORM SEMAKAN & PERMOHONAN AWAM -->
+    <div id="formPage" class="card">
+        <button class="btn-back" onclick="kembaliKeMukaDepan()">← Kembali ke Muka Depan</button>
+        <h2 style="color: #1e293b; text-align: center; margin-top: 0;">Borang Permohonan</h2>
+        
+        <div class="form-group">
+            <label for="nokp">No. Kad Pengenalan:</label>
+            <input type="text" id="nokp" placeholder="010101-01-0101" maxlength="14" oninput="formatKP(this)" required>
+        </div>
+        
+        <button class="btn-semak" onclick="semakKP()">SEMAK MAKLUMAT</button>
+        <p id="statusMsg"></p>
+
+        <div id="hasilBox" class="result-box">
+            <h3 style="margin-top:0; color:#2563eb; font-size:16px;">Maklumat Ditemui:</h3>
+            <div class="data-row"><span>Nama:</span> <strong id="resNama"></strong></div>
+            <div class="data-row"><span>Jumlah:</span> <strong id="resJumlah"></strong></div>
+            <div class="data-row"><span>Pasang:</span> <strong id="resPasang"></strong></div>
+
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #e2e8f0;">
+            <h3 style="margin-top:0; color:#1e293b; font-size:16px;">Lengkapkan Maklumat Tambahan:</h3>
+
+            <div class="form-group">
+                <label for="selectJawatan">Jawatan:</label>
+                <select id="selectJawatan" onchange="tapisGred()">
+                    <option value="">-- Pilih Jawatan --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="selectGred">Gred:</label>
+                <select id="selectGred">
+                    <option value="">-- Pilih Jawatan Terlebih Dahulu --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="selectJabatan">Jabatan:</label>
+                <select id="selectJabatan" onchange="tapisUnit()">
+                    <option value="">-- Pilih Jabatan --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="selectUnit">Unit:</label>
+                <select id="selectUnit">
+                    <option value="">-- Pilih Jabatan Terlebih Dahulu --</option>
+                </select>
+            </div>
+
+            <button class="btn-simpan" onclick="simpanData()">SAHKAN & SIMPAN DATA</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const scriptURL = 'URL_WEB_APP_GOOGLE_BRO_DI_SINI';
+    let currentData = {};
+    let globalDropdownData = [];
+
+    function bukaPermohonan() {
+        document.getElementById('landingPage').style.display = 'none';
+        document.getElementById('formPage').style.display = 'block';
+        muatDataDropdown();
+    }
+
+    function bukaAdmin() {
+        // Arahkan terus ke fail PHP admin bro (contoh: admin.php)
+        window.location.href = 'admin.php';
+    }
+
+    function kembaliKeMukaDepan() {
+        document.getElementById('formPage').style.display = 'none';
+        document.getElementById('landingPage').style.display = 'flex';
+    }
+
+    function muatDataDropdown() {
+        fetch(scriptURL + '?action=getDropdowns')
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'dropdowns') {
+                    globalDropdownData = res.data;
+                    let jawatanSet = new Set();
+                    let jabatanSet = new Set();
+
+                    globalDropdownData.forEach(item => {
+                        if (item.jawatan) jawatanSet.add(item.jawatan);
+                        if (item.jabatan) jabatanSet.add(item.jabatan);
+                    });
+
+                    let selJawatan = document.getElementById('selectJawatan');
+                    selJawatan.innerHTML = '<option value="">-- Pilih Jawatan --</option>';
+                    jawatanSet.forEach(jw => {
+                        let opt = document.createElement('option');
+                        opt.value = jw; opt.textContent = jw;
+                        selJawatan.appendChild(opt);
+                    });
+
+                    let selJabatan = document.getElementById('selectJabatan');
+                    selJabatan.innerHTML = '<option value="">-- Pilih Jabatan --</option>';
+                    jabatanSet.forEach(jb => {
+                        let opt = document.createElement('option');
+                        opt.value = jb; opt.textContent = jb;
+                        selJabatan.appendChild(opt);
+                    });
+                }
+            });
+    }
+
+    function tapisGred() {
+        let selectedJawatan = document.getElementById('selectJawatan').value;
+        let selGred = document.getElementById('selectGred');
+        selGred.innerHTML = '<option value="">-- Pilih Gred --</option>';
+        if (!selectedJawatan) return;
+
+        let gredSet = new Set();
+        globalDropdownData.forEach(item => {
+            if (item.jawatan === selectedJawatan && item.gred) gredSet.add(item.gred);
+        });
+        gredSet.forEach(gd => {
+            let opt = document.createElement('option');
+            opt.value = gd; opt.textContent = gd;
+            selGred.appendChild(opt);
+        });
+    }
+
+    function tapisUnit() {
+        let selectedJabatan = document.getElementById('selectJabatan').value;
+        let selUnit = document.getElementById('selectUnit');
+        selUnit.innerHTML = '<option value="">-- Pilih Unit --</option>';
+        if (!selectedJabatan) return;
+
+        let unitSet = new Set();
+        globalDropdownData.forEach(item => {
+            if (item.jabatan === selectedJabatan && item.unit) unitSet.add(item.unit);
+        });
+        unitSet.forEach(un => {
+            let opt = document.createElement('option');
+            opt.value = un; opt.textContent = un;
+            selUnit.appendChild(opt);
+        });
+    }
+
+    function formatKP(input) {
+        let v = input.value.replace(/\D/g, '');
+        if (v.length > 6 && v.length <= 8) {
+            v = v.slice(0,6) + '-' + v.slice(6);
+        } else if (v.length > 8) {
+            v = v.slice(0,6) + '-' + v.slice(6,8) + '-' + v.slice(8,12);
+        }
+        input.value = v;
+    }
+
+    function semakKP() {
+        let kp = document.getElementById('nokp').value.trim();
+        let statusMsg = document.getElementById('statusMsg');
+        let hasilBox = document.getElementById('hasilBox');
+        
+        if (kp.length < 14) { alert('Sila masukkan No. KP yang lengkap.'); return; }
+
+        statusMsg.style.color = '#2563eb';
+        statusMsg.innerText = '🔍 Mencari rekod...';
+        hasilBox.style.display = 'none';
+
+        fetch(scriptURL + '?nokp=' + encodeURIComponent(kp))
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'found') {
+                    currentData = data;
+                    document.getElementById('resNama').innerText = data.nama;
+                    document.getElementById('resJumlah').innerText = data.jumlah;
+                    document.getElementById('resPasang').innerText = data.pasang;
+                    hasilBox.style.display = 'block';
+                    statusMsg.innerText = '';
+                } else {
+                    statusMsg.style.color = '#dc2626';
+                    statusMsg.innerText = '❌ Maaf, No. KP tidak dijumpai.';
+                }
+            });
+    }
+
+    function simpanData() {
+        let jw = document.getElementById('selectJawatan').value;
+        let gd = document.getElementById('selectGred').value;
+        let jbt = document.getElementById('selectJabatan').value;
+        let un = document.getElementById('selectUnit').value;
+        let statusMsg = document.getElementById('statusMsg');
+
+        if (!jw || !gd || !jbt || !un) { alert('Sila lengkapkan semua ruangan pilihan.'); return; }
+
+        statusMsg.style.color = '#d97706';
+        statusMsg.innerText = '⏳ Menyimpan data...';
+
+        fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify({
+                nokp: currentData.nokp,
+                nama: currentData.nama,
+                jumlah: currentData.jumlah,
+                pasang: currentData.pasang,
+                dataJawatan: jw,
+                dataGred: gd,
+                jabatan: jbt,
+                unit: un
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                statusMsg.style.color = '#16a34a';
+                statusMsg.innerText = res.message;
+                document.getElementById('hasilBox').style.display = 'none';
+                document.getElementById('nokp').value = '';
+            } else {
+                statusMsg.style.color = '#dc2626';
+                statusMsg.innerText = res.message;
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
