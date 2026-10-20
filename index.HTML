@@ -178,7 +178,7 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwgpvMSliyiLXWS3WP17ZDbG-8kUzpHZ7eXT9WPBTEe4XYe9dq_2kGQZe7Gq-oGUD_f/exec';
+    const scriptURL = '/.netlify/functions/api';
     let currentData = {};
     let globalDropdownData = [];
     
@@ -264,7 +264,7 @@
 
         // Tukar kepada kaedah POST atau pastikan GET menyertakan header yang bersih
         fetch(scriptURL + '?nokp=' + encodeURIComponent(kp))
-    .then(async res => {
+        .then(async res => {
         const text = await res.text();
 
         console.log("HTTP Status:", res.status);
